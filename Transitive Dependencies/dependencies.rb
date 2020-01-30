@@ -14,24 +14,30 @@ class Dependencies
 
 	def calculate_dependencies
 		@raw_dependencies.keys.each do |key|
-			@processed_dependencies[key] = all_dependencies_for(@raw_dependencies[key], [key])&.uniq&.sort
+			@processed_dependencies[key] = all_dependencies_for(@raw_dependencies[key], [key])
 		end
 	end
 
 	private
 
-	def all_dependencies_for targets, touched
-		deps = Array.new
+	def all_dependencies_for targets, seen_targets
+		dependencies = Array(targets)
 		targets.each do |target|
-			next if touched.include?(target)
-			value = Array(dependencies_for target) - touched
-			value = calculate_dependencies_for(target, touched.push(target)) if value.empty?
-			deps.push(value, target)
+			next if seen_targets.include?(target)
+			dependencies += look_up_or_calculate_dependencies_for(target, seen_targets)
 		end
-		deps.flatten
+		refine(dependencies, seen_targets.first)
 	end
 
-	def calculate_dependencies_for target, touched
-		@raw_dependencies[target].nil? ? target : all_dependencies_for(@raw_dependencies[target], touched)
+	def look_up_or_calculate_dependencies_for target, seen_targets
+		dependencies_for(target) || calculate_dependencies_for(target, seen_targets.push(target))
+	end
+
+	def refine array, target_to_exclude
+		array.uniq.sort - [target_to_exclude]
+	end
+
+	def calculate_dependencies_for target, seen_targets
+		@raw_dependencies[target].nil? ? [target] : all_dependencies_for(@raw_dependencies[target], seen_targets)
 	end
 end
