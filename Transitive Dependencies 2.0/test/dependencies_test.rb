@@ -1,7 +1,29 @@
 require "dependencies"
 require "test/unit"
- 
+
 class TestDependencies < Test::Unit::TestCase
+
+	def test_can_append_nodes_to_the_tree
+		dependencies = Dependencies.new
+
+		dependencies.add_direct(:a, [])
+		assert_equal ({a: {}}), dependencies.tree
+
+		dependencies.add_direct(:a, [:b, :c])
+		assert_equal ({a: {b: {}, c: {}}}), dependencies.tree
+
+		dependencies.tree = {a: {b: {}}}
+		dependencies.add_direct(:b, [:c, :d])
+		assert_equal ({a: {b: {c: {}, d: {} }}}), dependencies.tree
+
+		dependencies.tree = {a: {b: {}, c: { d: {}}}}
+		dependencies.add_direct(:b, [:c, :e])
+		assert_equal ({a: {b: {c: { d: {}}, e:{} }}}), dependencies.tree
+
+		dependencies.tree = {a: {}}
+		dependencies.add_direct(:b, [:a])
+		assert_equal ({b: {a: {}}}), dependencies.tree
+	end
 
 	def test_basic
 		dep = Dependencies.new
@@ -11,8 +33,6 @@ class TestDependencies < Test::Unit::TestCase
 		dep.add_direct('D', %w{ A F } )
 		dep.add_direct('E', %w{ F   } )
 		dep.add_direct('F', %w{ H   } )
-
-		#dep.dependencies = {"D"=>{"A"=>{"B"=>{"C"=>{"G"=>{}}, "E"=>{"F"=>{"H"=>{}}}}}}}
 
 		assert_equal( %w{ B C E F G H },   dep.dependencies_for('A'))
 		assert_equal( %w{ C E F G H },     dep.dependencies_for('B'))
@@ -24,12 +44,9 @@ class TestDependencies < Test::Unit::TestCase
 
 	# def test_cyclic
 	# 	dep = Dependencies.new
-	# 	dep.add_direct('A', %w{ B })
-	# 	dep.add_direct('B', %w{ C })
-	# 	dep.add_direct('C', %w{ A })
-
-	# 	dep.dependencies = {"A"=>{"B"=>{"C"=>{"A"=>{"B"=>{}}}}}}
-	# 	dep.dependencies = {"B"=>{"C"=>{"A"=>{"B"=>{"C"=>{}}}}}}
+	# 	#dep.add_direct('A', %w{ B })
+	# 	#dep.add_direct('B', %w{ C })
+	# 	#dep.add_direct('C', %w{ A })
 
 	# 	assert_equal( %w{ B C },   dep.dependencies_for('A'))
 	# 	assert_equal( %w{ A C },   dep.dependencies_for('B'))
