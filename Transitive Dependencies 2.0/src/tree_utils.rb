@@ -17,10 +17,7 @@ class TreeUtils
     end
   end
 
-  def self.subtree node, tree
-    return tree[node] if tree.has_key?(node)
-    path = path(node, tree)
-    return {} if path.empty?
-    tree.dig(*path)
+  def self.tree_starting_at target, tree
+    path(target, tree).tap(&:pop).reduce(tree, :[])
   end
 end

@@ -34,6 +34,7 @@ class TestDependencies < Test::Unit::TestCase
 		dep.add_direct('E', %w{ F   } )
 		dep.add_direct('F', %w{ H   } )
 
+
 		assert_equal( %w{ B C E F G H },   dep.dependencies_for('A'))
 		assert_equal( %w{ C E F G H },     dep.dependencies_for('B'))
 		assert_equal( %w{ G },             dep.dependencies_for('C'))

@@ -23,12 +23,12 @@ class TreeUtilsTest < Test::Unit::TestCase
     assert_equal [:a], TreeUtils.path(:a, { a: {b: {c: {d: {e: {f: {}}}}}}, z: {}})
   end
 
-  test 'can find a subtree given a node' do
-    assert_equal ({}), TreeUtils.subtree(:a, {})
-    assert_equal ({}), TreeUtils.subtree(:a, {a: {}})
-    assert_equal ({}), TreeUtils.subtree(:b, {a: {}})
-    assert_equal ({b: {}}), TreeUtils.subtree(:a, {a: {b: {}}})
-    assert_equal ({c: {}}), TreeUtils.subtree(:b, {a: {b: {c: {}}}})
-    assert_equal ({m: {d: {}}}), TreeUtils.subtree(:l, a: {b: {c: {}}}, k: {l: {m: {d: {}}}})
+  test 'can get a subtree from the level the target is at' do
+    assert_equal ({}), TreeUtils.tree_starting_at(:a, {})
+    assert_equal ({a: {}, b: {}}), TreeUtils.tree_starting_at(:a, {a: {}, b: {}})
+    assert_equal ({a: {}}), TreeUtils.tree_starting_at(:b, {a: {}})
+    assert_equal ({a: {b: {}}}), TreeUtils.tree_starting_at(:a, {a: {b: {}}})
+    assert_equal ({b: {c: {}}}), TreeUtils.tree_starting_at(:b, {a: {b: {c: {}}}})
+    assert_equal ({l: {m: {d: {}}}}), TreeUtils.tree_starting_at(:l, a: {b: {c: {}}}, k: {l: {m: {d: {}}}})
   end
 end

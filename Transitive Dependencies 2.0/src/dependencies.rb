@@ -10,32 +10,30 @@ class Dependencies
 	end
 
 	def dependencies_for target
-		TreeUtils.all_nodes(TreeUtils.subtree(target, @tree)).sort
+		TreeUtils.all_nodes(subtree_under(target)).sort
 	end
 
 	private
 
 	def append target, nodes
-		subtrees = subtrees(nodes)
+		subtrees_under_nodes = find_subtrees_under(nodes)
 		remove_from_tree(nodes)
-		repopulate_tree(target, subtrees)
+		repopulate_tree(target, subtrees_under_nodes)
 	end
 
-	def subtrees nodes
-		Hash[nodes.map {|node| [node, TreeUtils.subtree(node, @tree)]}]
+	def find_subtrees_under nodes
+		Hash[nodes.map {|node| [node, subtree_under(node)]}]
+	end
+	
+	def subtree_under target
+		TreeUtils.tree_starting_at(target, @tree)[target] || {}
 	end
 
 	def remove_from_tree nodes
-		nodes.each do |node|
-			path_up_to_parent(node).reduce(@tree, :[]).delete(node)
-		end
-	end
-
-	def path_up_to_parent target
-		TreeUtils.path(target, @tree).tap(&:pop)
+		nodes.each {|node| TreeUtils.tree_starting_at(node, @tree).delete(node)}
 	end
 
 	def repopulate_tree target, subtrees
-		path_up_to_parent(target).reduce(@tree, :[])[target] = subtrees
+		TreeUtils.tree_starting_at(target, @tree)[target] = subtrees
 	end
 end
